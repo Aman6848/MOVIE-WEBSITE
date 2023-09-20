@@ -1,27 +1,50 @@
-const express=require('express')
-//console.log('Aman')
 
-//syntax of express
-const app=express()
+const express = require('express');
+const request = require('request')   // to take the data from the outside using api  and displaying that data
+const app = express();
+const dotenv=require('dotenv')
+dotenv.config()
+  
+// const API_KEY="b22a3539";
+app.set("view engine", 'ejs') ///middleware 
 
+app.get('/', (req, res) => {
+    res.render('homepage')
+    // res.send("hi")
+})
+app.get('/result', (req, res) => {
+    console.log(req.query.MovieName)
+    // res.send(`searched for ${req.query.MovieName}`)
+    const url = `http://www.omdbapi.com/?apikey=b22a3539&s=${req.query.MovieName}`
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            const data = JSON.parse(body);
+            res.render("result",{movieData: data, search: req.query.MovieName})
 
-// if client want to move to / then return this data
-app.get("/",(req,res)=>{
-    res.send("Hi Aman!")
-});
+        } else {
+            res.send("Error")
+        }
+    })
+})
 
-// if client move to home address then return this data
-// app.get("/Home",(req,res)=>{
-//     res.send("You are in class Now at all")
-// })
+app.get('/result/:id', (req, res) => {
+    // res.send(`searched for ${req.query.MovieName}`)
+    const url = `http://www.omdbapi.com/?apikey=b22a3539&i=${req.params.id}`
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            const data = JSON.parse(body);
+            res.render("knowmore",{data : data})
 
-// from line 19 to 23 , this is used for routes like if we want to move to a diff address then we can make request and return data.
-// the synatx for any id is app.get("/home/:id" , (req,res)=>{}) 
-// also this '${req.params.id' is the method to write html in express 
-app.get("/Home/:name", (req,res)=>{
-   // console.log(req.params)
-    res.send(`you are in ${req.params.name} class Now`)
-});
-app.listen(3000,()=>{
-    console.log("Server is Started");
+        } else {
+            res.send("Error")
+        }
+    })
+})
+app.get("*",(req,res)=>{
+    // res.send('Go Back! Illegal request')
+    res.render('Illegal')
+
+})
+app.listen('3000', () => {
+    console.log("server started");
 })
